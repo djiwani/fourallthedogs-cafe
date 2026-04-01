@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard · Four All The Dogs Café</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.6/dist/amazon-cognito-identity.min.js"></script>
+<style>
+  :root {
+    --espresso: #1a0f0a;
+    --dark-roast: #2c1810;
+    --brown: #6b3a2a;
+    --caramel: #c8763a;
+    --gold: #d4a853;
+    --cream: #f5ede0;
+    --latte: #e8d5bc;
+    --foam: #faf4ec;
+    --white: #fffcf8;
+    --muted: #9a7d6b;
+    --text: #4a2e20;
+    --border: rgba(107, 58, 42, 0.12);
+    --success: #2d7a4f;
+    --error: #c83c1e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--espresso);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── LOGIN PAGE ── */
+  .login-page {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+  }
+
+  .login-page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 60% at 20% 20%, rgba(200, 118, 58, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 80% at 80% 80%, rgba(212, 168, 83, 0.05) 0%, transparent 60%);
+  }
+
+  .login-page::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(200,118,58,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,118,58,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .login-card {
+    background: var(--white);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+    box-shadow: 0 48px 120px rgba(0,0,0,0.4);
+    position: relative;
+    z-index: 1;
+    animation: cardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(40px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .login-card-header {
+    background: var(--dark-roast);
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-card-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(200,118,58,0.2) 0%, transparent 70%);
+  }
+
+  .login-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--cream);
+    margin-bottom: 4px;
+  }
+
+  .login-brand span { font-style: italic; color: var(--gold); }
+
+  .login-tagline {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(245, 237, 224, 0.35);
+  }
+
+  .login-card-body {
+    padding: 36px 40px;
+  }
+
+  .login-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--espresso);
+    margin-bottom: 4px;
+  }
+
+  .login-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  .field-group {
+    margin-bottom: 16px;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .field-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--foam);
+    border: 1.5px solid var(--latte);
+    border-radius: 8px;
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field-input:focus {
+    border-color: var(--caramel);
+    box-shadow: 0 0 0 3px rgba(200, 118, 58, 0.1);
+  }
+
+  .field-input::placeholder { color: #c4a88a; }
+
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--espresso);
+    color: var(--cream);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .login-btn:hover {
+    background: var(--dark-roast);
+    transform: translateY(-1px);
+  }
+
+  .error-toast {
+    background: rgba(200, 60, 30, 0.08);
+    border: 1px solid rgba(200, 60, 30, 0.2);
+    color: var(--error);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* ── DASHBOARD ── */
+  .dashboard {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--foam);
+  }
+
+  .dashboard.active { display: flex; }
+
+  /* ── DASHBOARD HEADER ── */
+  .dash-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .dash-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dash-brand-icon {
+    width: 36px; height: 36px;
+    background: var(--espresso);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .dash-brand-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--espresso);
+  }
+
+  .dash-brand-sub {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .dash-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--foam);
+    border: 1px solid var(--latte);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .refresh-btn:hover {
+    border-color: var(--caramel);
+    color: var(--caramel);
+  }
+
+  .logout-btn {
+    background: var(--espresso);
+    color: var(--cream);
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .logout-btn:hover { background: var(--dark-roast); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+  }
+
+  .stat-item {
+    padding: 20px 32px 20px 0;
+    margin-right: 32px;
+    border-right: 1px solid var(--border);
+    last-child { border-right: none; }
+  }
+
+  .stat-item:last-child { border-right: none; }
+
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--espresso);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* ── ORDERS CONTENT ── */
+  .dash-content {
+    flex: 1;
+    padding: 32px 40px;
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .content-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--espresso);
+  }
+
+  .content-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  /* ── ORDER CARDS ── */
+  .orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .order-card {
+    background: var(--white);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: orderIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .order-card:nth-child(1) { animation-delay: 0.05s; }
+  .order-card:nth-child(2) { animation-delay: 0.1s; }
+  .order-card:nth-child(3) { animation-delay: 0.15s; }
+  .order-card:nth-child(4) { animation-delay: 0.2s; }
+  .order-card:nth-child(5) { animation-delay: 0.25s; }
+  .order-card:nth-child(6) { animation-delay: 0.3s; }
+
+  @keyframes orderIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(26, 15, 10, 0.08);
+  }
+
+  .order-card-top {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--foam);
+  }
+
+  .order-card-drink {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .order-drink-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--espresso);
+    line-height: 1.2;
+  }
+
+  .order-drink-badge {
+    background: var(--foam);
+    border: 1px solid var(--latte);
+    color: var(--caramel);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .order-card-body {
+    padding: 16px 20px;
+  }
+
+  .order-customer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .customer-avatar {
+    width: 32px; height: 32px;
+    background: var(--espresso);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--cream);
+    font-weight: 600;
+    font-family: 'Playfair Display', serif;
+    flex-shrink: 0;
+  }
+
+  .customer-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .customer-time {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .order-specs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .spec-chip {
+    background: var(--foam);
+    border: 1px solid var(--latte);
+    color: var(--text);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 400;
+  }
+
+  /* ── LOADING STATE ── */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    gap: 16px;
+    color: var(--muted);
+  }
+
+  .loading-spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--latte);
+    border-top-color: var(--caramel);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+  }
+
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+
+  .empty-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--espresso);
+    margin-bottom: 8px;
+  }
+
+  .empty-sub {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  @media (max-width: 768px) {
+    .dash-header { padding: 0 20px; }
+    .stats-bar { padding: 0 20px; overflow-x: auto; }
+    .dash-content { padding: 24px 20px; }
+    .orders-grid { grid-template-columns: 1fr; }
+    .login-card-body { padding: 28px 24px; }
+    .login-card-header { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <div class="login-card-header">
+      <div class="login-brand">Four All The Dogs <span>Café</span></div>
+      <div class="login-tagline">Admin Dashboard</div>
+    </div>
+    <div class="login-card-body">
+      <div class="login-title">Welcome back</div>
+      <div class="login-subtitle">Sign in to manage your orders</div>
+      <div class="error-toast" id="errorToast"></div>
+      <div class="field-group">
+        <label class="field-label">Email</label>
+        <input id="email" class="field-input" type="email" placeholder="admin@example.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <input id="password" class="field-input" type="password" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter') login()">
+      </div>
+      <button class="login-btn" onclick="login()">Sign In →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+
+  <!-- HEADER -->
+  <div class="dash-header">
+    <div class="dash-brand">
+      <div class="dash-brand-icon">☕</div>
+      <div>
+        <div class="dash-brand-text">Four All The Dogs</div>
+        <div class="dash-brand-sub">Order Dashboard</div>
+      </div>
+    </div>
+    <div class="dash-actions">
+      <button class="refresh-btn" onclick="loadOrders()">↻ Refresh</button>
+      <button class="logout-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-value" id="totalOrders">—</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="todayOrders">—</div>
+      <div class="stat-label">Today</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="topDrink">—</div>
+      <div class="stat-label">Top Drink</div>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="dash-content">
+    <div class="content-header">
+      <div>
+        <div class="content-title">Recent Orders</div>
+        <div class="content-sub">Sorted by newest first</div>
+      </div>
+    </div>
+    <div id="ordersContainer"></div>
+  </div>
+
+</div>
+
+<script>
+const poolData = {
+  UserPoolId: "us-east-1_DuMIqUAoe",
+  ClientId: "37n1fpliqdgohd81ld6b8usspi"
+};
+
+const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+let idToken = null;
+
+// ── AUTO RESTORE ──────────────────────────────────────────────────────────────
+window.onload = function() {
+  const cognitoUser = userPool.getCurrentUser();
+  if (cognitoUser) {
+    cognitoUser.getSession(function(err, session) {
+      if (!err && session.isValid()) {
+        idToken = session.getIdToken().getJwtToken();
+        showDashboard();
+        loadOrders();
+      }
+    });
+  }
+};
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+function login() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  const authDetails = new AmazonCognitoIdentity.AuthenticationDetails({ Username: email, Password: password });
+  const cognitoUser = new AmazonCognitoIdentity.CognitoUser({ Username: email, Pool: userPool });
+
+  cognitoUser.authenticateUser(authDetails, {
+    onSuccess: function(result) {
+      idToken = result.getIdToken().getJwtToken();
+      showDashboard();
+      loadOrders();
+    },
+    onFailure: function(err) {
+      const toast = document.getElementById('errorToast');
+      toast.textContent = err.message;
+      toast.style.display = 'block';
+    }
+  });
+}
+
+// ── LOGOUT ────────────────────────────────────────────────────────────────────
+function logout() {
+  const cognitoUser = userPool.getCurrentUser();
+  if (cognitoUser) cognitoUser.signOut();
+  location.reload();
+}
+
+// ── UI ────────────────────────────────────────────────────────────────────────
+function showDashboard() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('dashboard').classList.add('active');
+}
+
+// ── LOAD ORDERS ───────────────────────────────────────────────────────────────
+async function loadOrders() {
+  const container = document.getElementById('ordersContainer');
+  container.innerHTML = `
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading orders</div>
+    </div>`;
+
+  try {
+    const response = await fetch(
+      "https://hpw7ts84kb.execute-api.us-east-1.amazonaws.com/prod/admin/orders",
+      { headers: { Authorization: idToken } }
+    );
+
+    const orders = await response.json();
+
+    // Stats
+    document.getElementById('totalOrders').textContent = orders.length;
+    const today = new Date().toDateString();
+    const todayCount = orders.filter(o => new Date(o.timestamp).toDateString() === today).length;
+    document.getElementById('todayOrders').textContent = todayCount;
+
+    // Top drink
+    if (orders.length) {
+      const drinkCounts = {};
+      orders.forEach(o => {
+        const d = (o.drink || '').split(' - ')[0];
+        drinkCounts[d] = (drinkCounts[d] || 0) + 1;
+      });
+      const top = Object.entries(drinkCounts).sort((a,b) => b[1]-a[1])[0];
+      document.getElementById('topDrink').textContent = top ? top[0] : '—';
+    }
+
+    if (!orders.length) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">☕</div>
+          <div class="empty-title">No orders yet</div>
+          <div class="empty-sub">Orders will appear here as they come in</div>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="orders-grid">${orders.map(order => {
+      const ts = order.timestamp ? new Date(order.timestamp) : null;
+      const timeStr = ts ? ts.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+      const initial = (order.name || '?').charAt(0).toUpperCase();
+      const drinkShort = (order.drink || '').split(' - ').slice(1).join(' - ') || order.drink;
+      const dogName = (order.drink || '').split(' - ')[0];
+
+      return `
+        <div class="order-card">
+          <div class="order-card-top">
+            <div class="order-card-drink">
+              <div class="order-drink-name">${drinkShort || 'Unknown drink'}</div>
+              <div class="order-drink-badge">${dogName}</div>
+            </div>
+          </div>
+          <div class="order-card-body">
+            <div class="order-customer">
+              <div class="customer-avatar">${initial}</div>
+              <div>
+                <div class="customer-name">${order.name || 'Unknown'}</div>
+                <div class="customer-time">${timeStr}</div>
+              </div>
+            </div>
+            <div class="order-specs">
+              ${order.size ? `<div class="spec-chip">📐 ${order.size}</div>` : ''}
+              ${order.temperature ? `<div class="spec-chip">${order.temperature === 'Hot' ? '🔥' : '🧊'} ${order.temperature}</div>` : ''}
+              ${order.extras && order.extras.length ? `<div class="spec-chip">✨ ${Array.isArray(order.extras) ? order.extras.join(', ') : order.extras}</div>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }).join('')}</div>`;
+
+  } catch {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Failed to load orders</div>
+        <div class="empty-sub">Check your connection and try again</div>
+      </div>`;
+  }
+}
+</script>
+</body>
+</html>

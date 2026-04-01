@@ -1,0 +1,95 @@
+const API_URL = "https://hpw7ts84kb.execute-api.us-east-1.amazonaws.com/prod/order";
+
+const IDENTITY_POOL_ID = "us-east-1:fb3933a4-e05e-4d38-bdca-4f9caa3b8d6e";
+
+const REGION = "us-east-1";
+
+AWS.config.region = REGION;
+
+AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+    IdentityPoolId: IDENTITY_POOL_ID
+});
+
+async function placeOrder() {
+
+    const output = document.getElementById("output");
+
+    output.innerHTML = "Submitting order...";
+
+    try {
+
+        await AWS.config.credentials.getPromise();
+
+        const creds = AWS.config.credentials;
+
+        const orderData = {
+            name: document.getElementById("name").value,
+            drink: document.getElementById("drink").value,
+            temperature: document.getElementById("temperature").value,
+            size: document.getElementById("size").value,
+            extras: document.getElementById("extras").value
+                .split(",")
+                .map(x => x.trim())
+                .filter(x => x.length > 0)
+        };
+
+        const endpoint = new AWS.Endpoint(API_URL);
+
+        const request = new AWS.HttpRequest(endpoint, REGION);
+
+        request.method = "POST";
+
+        request.path = endpoint.path;
+
+        request.headers["host"] = endpoint.host;
+
+        request.headers["Content-Type"] = "application/json";
+
+        request.body = JSON.stringify(orderData);
+
+        const signer = new AWS.Signers.V4(request, "execute-api");
+
+        signer.addAuthorization(creds, new Date());
+
+        const signedHeaders = {};
+
+        Object.keys(request.headers).forEach(key => {
+            signedHeaders[key] = request.headers[key];
+        });
+
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: signedHeaders,
+            body: request.body
+        });
+
+        const result = await response.json();
+
+        output.innerHTML =
+            "✅ Order Placed<br><br>" +
+            "Order ID: " + result.orderID + "<br>" +
+            "Name: " + result.name + "<br>" +
+            "Drink: " + result.drink + "<br>" +
+            "Temp: " + result.temperature + "<br>" +
+            "Size: " + result.size;
+
+    }
+    catch (err) {
+
+        output.innerHTML = "❌ Error: " + err;
+
+    }
+
+}
+
+/* expose functions globally for HTML onclick */
+
+window.placeOrder = placeOrder;
+
+window.openMenu = function () {
+    document.getElementById("menuModal").style.display = "flex";
+};
+
+window.closeMenu = function () {
+    document.getElementById("menuModal").style.display = "none";
+};
