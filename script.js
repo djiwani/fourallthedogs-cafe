@@ -57,7 +57,8 @@ async function placeOrder() {
             "✅ Order placed!<br><br>" +
             "<strong>" + result.drink + "</strong><br>" +
             "Name: " + result.name + "<br>" +
-            "Temp: " + result.temperature + " · Size: " + result.size;
+            "Temp: " + result.temperature + " · Size: " + result.size + "<br>" +
+			"Extras: " + result.extras;
 
     } catch (err) {
         output.className = "output-area visible error";
