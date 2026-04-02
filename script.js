@@ -1,5 +1,5 @@
-const API_URL = "https://hpw7ts84kb.execute-api.us-east-1.amazonaws.com/prod/order";
-const IDENTITY_POOL_ID = "us-east-1:fb3933a4-e05e-4d38-bdca-4f9caa3b8d6e";
+const API_URL = "https://phwa109uq4.execute-api.us-east-1.amazonaws.com/prod/order";
+const IDENTITY_POOL_ID = "us-east-1:54ee9071-4530-43fb-9361-701dabc52be0";
 const REGION = "us-east-1";
 
 AWS.config.region = REGION;
