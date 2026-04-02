@@ -54,10 +54,10 @@ async function placeOrder() {
 
         output.className = "output-area visible success";
         output.innerHTML =
-            "✅ Order placed!<br><br>" +
-            "<strong>" + result.drink + "</strong><br>" +
-            "Name: " + result.name + "<br>" +
-            "Temp: " + result.temperature + " · Size: " + result.size + "<br>" +
+			"✅ Order placed!<br><br>" +
+			"<strong>" + result.drink + "</strong><br>" +
+			"Name: " + result.name + "<br>" +
+			"Temp: " + result.temperature + " · Size: " + result.size + "<br>" +
 			"Extras: " + result.extras;
 
     } catch (err) {
