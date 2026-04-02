@@ -21,15 +21,15 @@ jobs:
           aws-region: us-east-1
 
       - name: Sync to S3
-          run: |
-            aws s3 sync . s3://fourallthedogs-cafe \
-              --exclude ".git/*" \
-              --exclude ".github/*" \
-              --exclude ".gitignore" \
-              --delete
+        run: |
+          aws s3 sync . s3://fourallthedogs-cafe \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude ".gitignore" \
+            --delete
 
-        - name: Invalidate CloudFront
-          run: |
-            aws cloudfront create-invalidation \
-              --distribution-id E6P7E79U183VM \
-              --paths "/*"
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E6P7E79U183VM \
+            --paths "/*"
